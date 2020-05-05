@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "PDF Site Exchanger: $1"
+
+filename=$1
+backup_filename="$filename.backup.pdf"
+
+# backup file
+cp $filename $backup_filename
+
+number_of_pages="$(pdftk $backup_filename dump_data | grep NumberOfPages | sed 's/[^0-9]*//')"
+
+echo $number_of_pages
+
+export_string=""
+
+for (( i = 0; i < (number_of_pages / 2); i++ )); do
+	lower_number=`expr $i + 1`;
+	higher_number=`expr $number_of_pages - $i`
+	export_string+="$lower_number $higher_number "
+done
+
+pdftk $backup_filename cat $export_string output $filename
+
+echo "Completed: $filename, Backup: $backup_filename"
+
+exit 0
